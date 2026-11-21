@@ -57,25 +57,25 @@ jobs:
           echo "version_name=${VERSION_NAME}" >> $GITHUB_OUTPUT
           echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Build sharedUid Release APK and companion package
+      - name: Build sharedUid & standalone Release APKs and companion package
         env:
           RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD || '123456' }}
           RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS || 'lytsocoder' }}
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD || '123456' }}
         run: |
           chmod +x gradlew
-          ./gradlew :lorie-app:assembleSharedUidRelease :shell-loader:buildCompanionPackage
+          ./gradlew :lorie-app:assembleSharedUidRelease :lorie-app:assembleStandaloneRelease :shell-loader:buildCompanionPackage
 
       - name: Organize Release Artifacts
         id: artifacts
         run: |
           mkdir -p release_output
-          APK_NAME="lytsocoder-termux-x11-sharedUid.apk"
-          cp lorie-app/build/outputs/apk/sharedUid/release/termux-x11-universal-sharedUid-release.apk "release_output/${APK_NAME}"
+          cp lorie-app/build/outputs/apk/sharedUid/release/termux-x11-universal-sharedUid-release.apk "release_output/lytsocoder-termux-x11-sharedUid.apk"
+          cp lorie-app/build/outputs/apk/standalone/release/termux-x11-universal-release.apk "release_output/lytsocoder-termux-x11-standalone.apk"
           cp shell-loader/build/outputs/companion/*-all.deb release_output/ || true
           cp shell-loader/build/outputs/companion/*-any.pkg.tar.xz release_output/ || true
           (cd release_output && sha256sum * > checksums-sha256.txt)
-          echo "apk_name=${APK_NAME}" >> $GITHUB_OUTPUT
+          echo "apk_name=lytsocoder-termux-x11-sharedUid.apk" >> $GITHUB_OUTPUT
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

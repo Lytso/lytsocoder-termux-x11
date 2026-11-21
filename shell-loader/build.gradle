@@ -28,10 +28,10 @@ def signingConfig = project(':lorie-app').android.signingConfigs.antigem
 def keyStore = java.security.KeyStore.getInstance(java.security.KeyStore.getDefaultType())
 keyStore.load(new FileInputStream(signingConfig.storeFile), signingConfig.keyPassword.toCharArray())
 
-// AntiGem: the loader starts AntiGem's Termux:X11 (lorie-app's applicationId, lytso.code.x11), and the companion
-// package's scripts live in AntiGem's Linux system (/data/data/lytso.code/files/usr). The Java names stay com.termux.x11.*
+// LytsoCoder: use standard com.termux prefix in the companion .deb so TermuxRelocation relocates it cleanly
+// into whichever package is running (lytso.code release OR lytso.cdev debug) without Permission denied.
 ext.targetApplicationId = project(':lorie-app').android.defaultConfig.applicationId
-ext.embeddedApplicationId = "lytso.code"
+ext.embeddedApplicationId = "com.termux"
 
 android.defaultConfig.buildConfigField "String", "APPLICATION_ID", "\"$targetApplicationId\""
 android.defaultConfig.buildConfigField "String", "EMBEDDED_APPLICATION_ID", "\"$embeddedApplicationId\""
@@ -41,7 +41,7 @@ android.defaultConfig.buildConfigField "String", "CLASS_ID", "\"com.termux.x11.C
 android.defaultConfig.buildConfigField "String", "packageNotInstalledErrorText",
         """\"Termux:X11 application is not found.\\n\" +
         \"You should choose latest release here: \\n https://github.com/Lytso/lytsocoder-termux-x11/releases/latest\\n\" +
-        \"After this you should download \\"antigem-termux-x11-sharedUid.apk\\" and install it.\\n\""""
+        \"After this you should download \\"lytsocoder-termux-x11-sharedUid.apk\\" (or standalone for debug) and install it.\\n\""""
 android.defaultConfig.buildConfigField "String", "packageSignatureMismatchErrorText",
         "\"Signature verification of target application $targetApplicationId failed.\\nPlease, reinstall both termux-x11 package and Termux:X11 application from the same source\""
 android.defaultConfig.buildConfigField "String", "COMMIT", "\"" + ("git rev-parse HEAD\n".execute().getText().trim() ?: (System.getenv('CURRENT_COMMIT') ?: "NO_COMMIT")) + "\""
